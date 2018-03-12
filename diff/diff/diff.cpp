@@ -3,9 +3,18 @@
 
 #include "stdafx.h"
 #include <string>
+#include <sstream>
+#include <iostream>
 #include <vector>
 #include <map>
 #include <algorithm>
+
+enum MoveType {
+    MoveType_None,
+    MoveType_Down,
+    MoveType_Right,
+    MoveType_Diagonal
+};
 
 struct Point {
     Point(int x, int y) {
@@ -13,12 +22,26 @@ struct Point {
         this->y = y;
     }
 
-    bool operator== (const Point& pt) {
+    bool operator== (const Point& pt) const {
         return this->x == pt.x && this->y == pt.y;
     }
 
-    bool operator!= (const Point& pt) {
+    bool operator!= (const Point& pt) const {
         return this->x != pt.x || this->y != pt.y;
+    }
+    
+    MoveType operator >(const Point& pt2) {
+        if (this->x == pt2.x && this->y + 1 == pt2.y) {
+            return MoveType_Down;
+        }
+        else if (this->y == pt2.y && this->x + 1 == pt2.x) {
+            return MoveType_Right;
+        }
+        else if (this->x + 1 == pt2.x && this->y + 1 == pt2.y) {
+            return MoveType_Diagonal;
+        }
+
+        return MoveType_None;
     }
 
     int x = 0;
@@ -114,6 +137,38 @@ int main()
         pt.y = yStart;
     }
 
+    path.pop_back();//path第一个点是假设的起点(0,-1);
+
+    //文字描述path代表的操作
+    std::stringstream stream;
+    if (path.size() >= 2) {        
+        int size = path.size();
+        for (int i = size - 2; i >= 0; --i) {
+            Point prev_point = path[i+1];
+            MoveType type = prev_point>(path[i]);
+            switch (type) {
+            case MoveType_Right: {
+                stream << "-" << A[prev_point.x];
+
+                break;
+            }
+            case MoveType_Down: {
+                stream << "+" << B[prev_point.y];
+
+                break;
+            }
+            case MoveType_Diagonal: {
+                stream << "=" << A[prev_point.x];
+
+                break;
+            }
+            }
+        }
+    }
+    std::cout << "最短编辑路线如下：" << std::endl;
+    std::cout << stream.str();
+    std::string input;
+    std::cin >> input;
 
     return 0;
 }
