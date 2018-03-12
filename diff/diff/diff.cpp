@@ -13,14 +13,22 @@ struct Point {
         this->y = y;
     }
 
+    bool operator== (const Point& pt) {
+        return this->x == pt.x && this->y == pt.y;
+    }
+
+    bool operator!= (const Point& pt) {
+        return this->x != pt.x || this->y != pt.y;
+    }
+
     int x = 0;
     int y = 0;
 };
 
 int main()
 {
-    std::string A = "AMCD";
-    std::string B = "AMMA";
+    std::string A = "ABACD";
+    std::string B = "ABMMA";
 
     int length_of_A = A.length();
     int length_of_B = B.length();
@@ -70,7 +78,7 @@ int main()
     }
 
     //回退，从终点到起点，找出路线
-    std::vector<Point> path; //每次move的起点、中间点、结束点
+    std::vector<Point> path; //move的路线
     Point pt(A.length(), B.length());
     path.push_back(pt);
     for (int d = Xlist.size() - 1; pt.x > 0 || pt.y > 0; --d) {
@@ -80,6 +88,12 @@ int main()
         //结束位置
         int xEnd = X[k];
         int yEnd = pt.x - k;
+        //结束位置前是否走的对角线
+        while (xEnd > 0 && yEnd > 0 && xEnd <= length_of_A && yEnd <= length_of_B && A[xEnd-1] == B[yEnd-1]) {
+            --xEnd;
+            --yEnd;
+            path.push_back(Point(xEnd, yEnd));
+        }
 
         //down可以确定上一步的k线，对角线上的移动不影响d和k
         //并且,Xlist[d][k-1] == Xlist[d-1][k-1]; Xlist[d][k+1] == Xlist[d-1][k+1]
@@ -90,18 +104,16 @@ int main()
         int xStart = X[kPrev];
         int yStart = xStart - kPrev;
 
-        //中间位置
-        int xTmp = down ? xStart : xStart + 1;
-        int yTmp = xTmp - k;
+        ////中间位置
+        //int xTmp = down ? xStart : xStart + 1;
+        //int yTmp = xTmp - k;
 
-        path.push_back(Point(xTmp, yTmp));
         path.push_back(Point(xStart, yStart));
 
         pt.x = xStart;
         pt.y = yStart;
     }
 
-    int m = path.size();
 
     return 0;
 }
